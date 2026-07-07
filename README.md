@@ -130,7 +130,7 @@ Before fitting, the year values are **standardized** (`(X - mean) / std`) so the
 Once the predicted 2026 closing rank is known, the app computes:
 
 $$
-\text{gap} = \frac{\text{predicted\_closing} - \text{your\_rank}}{\text{predicted\_closing}}
+\text{gap} = \frac{\text{predicted closing} - \text{your rank}}{\text{predicted closing}}
 $$
 
 and passes it through a **sigmoid**:
