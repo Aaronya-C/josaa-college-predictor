@@ -109,7 +109,7 @@ $$
 This gives the **exact, closed-form optimal parameters** in one shot — no iteration, no learning rate to tune.
 
 
-### 7. How this maps to the code (`src/app.py` / `src/linear_regression.py`)
+### 6. How this maps to the code (`src/app.py` / `src/linear_regression.py`)
 
 ```python
 class LinearRegression:
