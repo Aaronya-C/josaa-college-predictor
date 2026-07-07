@@ -24,11 +24,10 @@ A web app that predicts your chances of getting into IITs, NITs, IIITs, and GFTI
 
 ## Features
 
-- **Covers all 4 institute categories** — IITs, NITs, IIITs, and GFTIs (Government-Funded Technical Institutes) — each with its own rank type (Mains vs Advanced) and quota rules.
+- **Covers all 4 institute categories** — IITs, NITs, IIITs, and GFTIs — each with its own rank type (Mains vs Advanced) and quota rules.
 - **Home-state aware** — correctly applies Home State (HS) vs Other State (OS) quota logic for NITs and GFTIs, using a keyword-based mapping of institute name → state.
 - **Per-seat cutoff prediction** — every unique combination of institute + program + quota + category + gender is treated as its own "seat," with its own multi-year history and its own regression.
 - **Admission probability, not just a predicted rank** — converts the gap between your rank and the predicted cutoff into a 0–100% probability using a sigmoid function, so seats are easy to compare at a glance.
-- **Confidence labeling** — flags each prediction as `low` / `medium` / `high` confidence depending on how many years of data exist and how volatile the seat's cutoff history is.
 - **Filters** — filter by institute type, branch/program keyword, category (OPEN/OBC-NCL/SC/ST/EWS, incl. PwD), gender pool, and result count; quick-tabs to jump to High chance (>70%), Moderate (30–70%), or Reach (<30%) seats.
 - **No page reloads** — a single-page frontend that talks to the backend purely over a JSON API (`fetch`), so results render instantly after clicking "Predict."
 - **Zero external ML dependencies** — the regression model (Normal Equation) is implemented directly with NumPy, not imported from scikit-learn, so the whole prediction pipeline is transparent and auditable.
@@ -51,7 +50,7 @@ A web app that predicts your chances of getting into IITs, NITs, IIITs, and GFTI
 
 ## The Theory: Linear Regression via the Normal Equation
 
-For every seat with more than 3 years of history, the app fits a straight line through `(year, closing_rank)` points and extrapolates to 2026. Instead of using gradient descent, it solves for the optimal parameters **analytically** — the same derivation as in Andrew Ng's CS229 notes.
+For every seat with more than 3 years of history, the app fits a straight line through `(year, closing_rank)` points and extrapolates to 2026. Instead of using gradient descent, it solves for the optimal parameters
 
 ### 1. Setup
 
@@ -109,9 +108,6 @@ $$
 
 This gives the **exact, closed-form optimal parameters** in one shot — no iteration, no learning rate to tune.
 
-### 6. Why the pseudoinverse instead of a plain inverse?
-
-$X$ itself (shape $m \times (n+1)$) usually isn't square, so it has no inverse. But $X^TX$ *is* square ($(n+1)\times(n+1)$), which is exactly why the derivation multiplies through by $X^T$ first. Even so, $X^TX$ can be singular or poorly conditioned (e.g. very few years of data, or a repeated year). The implementation uses `np.linalg.pinv` (the Moore–Penrose **pseudoinverse**, computed via SVD) instead of `np.linalg.inv`, so it never crashes and always returns the best least-squares solution, even in degenerate cases.
 
 ### 7. How this maps to the code (`src/app.py` / `src/linear_regression.py`)
 
@@ -129,7 +125,7 @@ class LinearRegression:
 
 Before fitting, the year values are **standardized** (`(X - mean) / std`) so the regression isn't numerically unstable from working with large raw year numbers like 2024, 2025, etc.
 
-### 8. From predicted rank to probability
+### 7. From predicted rank to probability
 
 Once the predicted 2026 closing rank is known, the app computes:
 
@@ -182,47 +178,20 @@ Clg Predictor/
 └── README.md
 ```
 
----
-
-## Getting Started (Run Locally)
-
-### Prerequisites
-- Python 3.9+
-- `pip`
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd "Clg Predictor"
-```
-
-### 2. Install dependencies
-```bash
-pip install -r src/requirements.txt
-```
-
-### 3. Run the server
-```bash
-python src/app.py
-```
-
-### 4. Open the app
-Visit **http://localhost:5000** in your browser. Flask serves the frontend directly, so there's nothing else to start — one server, one command.
-
----
-
 ## How to Use
 
-1. **Select target institute type** — IITs, NITs, IIITs, or GFTIs. The form fields adapt automatically:
+1. Open the link: [https://jee-rank-predictor-twit.onrender.com/](https://jee-rank-predictor-twit.onrender.com/)
+
+2. **Select target institute type** — IITs, NITs, IIITs, or GFTIs. The form fields adapt automatically:
    - IITs → asks for **JEE Advanced rank**
    - NITs / IIITs / GFTIs → asks for **JEE Mains (CRL) rank**
    - NITs / GFTIs also require your **Home State**, since seat quotas differ for home-state vs other-state candidates
-2. **Enter your rank(s).** You can fill in Mains, Advanced, or both if you're unsure which institute type to target.
-3. **Choose your Category** (OPEN, OBC-NCL, SC, ST, EWS, or their PwD variants) and **Gender pool**.
-4. *(Optional)* Type a **branch/program keyword** (e.g. "Computer Science") to narrow results to a specific field.
-5. *(Optional)* Choose how many results to display — Top 20 / 50 / 100 / All.
-6. Click **Predict Seat Allotment**.
-7. Browse the results table, sorted by best (lowest) predicted cutoff first. Use the **All / High chance / Moderate / Reach** tabs to filter by admission probability:
+3. **Enter your rank(s).** You can fill in Mains, Advanced, or both if you're unsure which institute type to target.
+4. **Choose your Category** (OPEN, OBC-NCL, SC, ST, EWS, or their PwD variants) and **Gender pool**.
+5. *(Optional)* Type a **branch/program keyword** (e.g. "Computer Science") to narrow results to a specific field.
+6. *(Optional)* Choose how many results to display — Top 20 / 50 / 100 / All.
+7. Click **Predict Seat Allotment**.
+8. Browse the results table, sorted by best (lowest) predicted cutoff first. Use the **All / High chance / Moderate / Reach** tabs to filter by admission probability:
    - **High chance (>70%)** — your rank is comfortably better than the predicted cutoff
    - **Moderate (30-70%)** — a genuine toss-up
    - **Reach (<30%)** — unlikely, but not impossible
@@ -247,13 +216,11 @@ Each row shows the institute, program, quota, predicted 2026 closing rank, how i
 
 ## Disclaimer
 
-This tool provides **statistical estimates based on historical JoSAA data**, not official predictions. Actual JoSAA cutoffs depend on many factors (number of applicants, seat matrix changes, new programs, policy changes) that a historical trend line cannot fully capture. Always cross-check with official JoSAA sources before making admission decisions.
+ - This tool provides **statistical estimates based on historical JoSAA data (2018-2025)**, not official predictions. Actual JoSAA cutoffs depend on many factors (number of applicants, seat matrix changes, new programs, policy changes) that a historical trend line cannot fully capture. Always cross-check with official JoSAA sources before making admission decisions.
+   
+ - All predictions are made on last round closing ranks of each year
 
----
-
-## License
-
-This project is open source. Add your preferred license (e.g. MIT) here.
+ - Newer programs/branches are not predicted by this predictor.
 
 ---
 
