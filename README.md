@@ -30,6 +30,7 @@ A web app that predicts your chances of getting into IITs, NITs, IIITs, and GFTI
 - **Admission probability, not just a predicted rank** — converts the gap between your rank and the predicted cutoff into a 0–100% probability using a sigmoid function, so seats are easy to compare at a glance.
 - **Filters** — filter by institute type, branch/program keyword, category (OPEN/OBC-NCL/SC/ST/EWS, incl. PwD), gender pool, and result count; quick-tabs to jump to High chance (>70%), Moderate (30–70%), or Reach (<30%) seats.
 - **No page reloads** — a single-page frontend that talks to the backend purely over a JSON API (`fetch`), so results render instantly after clicking "Predict."
+- **Used public dataset** — I have used the public dataset available at [https://www.kaggle.com/datasets/ramram234/jee-cutoff-2018-2025-round-1to6](https://www.kaggle.com/datasets/ramram234/jee-cutoff-2018-2025-round-1to6)
 - **Zero external ML dependencies** — the regression model (Normal Equation) is implemented directly with NumPy, not imported from scikit-learn, so the whole prediction pipeline is transparent and auditable.
 
 ---
